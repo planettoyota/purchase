@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Purchase Upload · Planet Toyota</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#15171C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Purchase">
+<style>
+:root{--bg:#F3F1EC;--card:#fff;--ink:#15171C;--mut:#6A6F79;--line:#E2DED5;--red:#C4122F;--ok:#1E7A4C;--okbg:#E6F3EC;--warn:#A85A08;--warnbg:#FBF0E1;--soft:#EDEAE3}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100dvh}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:10px}
+header b{flex:1;font-size:17px}header small{display:block;font-weight:400;opacity:.7;font-size:12px}
+header button{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:10px;padding:8px 12px;font-weight:600}
+main{max-width:860px;margin:0 auto;padding:14px 14px 60px}
+.tabs{display:flex;background:var(--soft);border-radius:13px;padding:4px;margin-bottom:14px}
+.tabs button{flex:1;border:0;background:none;padding:10px 0;border-radius:10px;font-weight:700;font-size:14px;color:var(--mut)}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{margin:0 0 6px;font-size:16px}
+.mut{color:var(--mut)}small.mut{font-size:13px}
+.drop{display:block;color:var(--ink);font-size:15px;border:2px dashed var(--line);border-radius:16px;padding:26px 16px;text-align:center;background:#fff;cursor:pointer}
+.drop b{display:block;font-size:17px;margin-bottom:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.stat{border-radius:12px;padding:10px;text-align:center;background:var(--soft)}
+.stat b{display:block;font-size:24px}.stat.ok{background:var(--okbg);color:var(--ok)}.stat.warn{background:var(--warnbg);color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:12px}
+.tw{overflow-x:auto;margin:6px 0 4px}
+.prob{color:var(--red);font-size:12px}
+label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:10px}
+label input,label select{display:block;width:100%;margin-top:4px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px}
+label input:disabled,label select:disabled{background:var(--soft);color:var(--ink)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.veh .hd{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
+.veh .hd b{font-size:15px;word-break:break-all}
+.veh .hd .chip{align-self:flex-start}
+.chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--mut);white-space:nowrap}
+.chip.ok{background:var(--okbg);color:var(--ok)}.chip.warn{background:var(--warnbg);color:var(--warn)}
+.search{display:flex;gap:8px;margin-bottom:10px}.search input{flex:1;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:15px}
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100vw - 32px);text-align:center}
+#toast.bad{background:var(--red)}
+#busy{position:fixed;inset:0;background:rgba(243,241,236,.7);z-index:15;display:flex;align-items:center;justify-content:center;font-weight:700}
+.note{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13px;margin:8px 0}
+@media (max-width:560px){.g2{grid-template-columns:1fr}.stat b{font-size:20px}}
+</style>
+</head>
+<body>
+<header><b>Purchase Upload<small id="who">Planet Toyota</small></b><button id="portalBtn">Portal</button></header>
+<main id="app" hidden>
+  <nav class="tabs"><button data-tab="up" class="on">Upload</button><button data-tab="grn">GRN &amp; transfer</button><button data-tab="hist">History</button></nav>
+
+  <section id="t-up">
+    <div class="card">
+      <h3>Add vehicles from CTDMS</h3>
+      <p class="mut" style="margin:0 0 12px">Pick the purchase Excel exported from CTDMS, as it comes. The app shows what it will add; only vehicles not already in Purchase Data are added, in the next empty rows. Nothing can be deleted.</p>
+      <label class="drop" for="file"><b>Choose CTDMS Excel file</b><small class="mut">.xlsx or .csv</small></label>
+      <input type="file" id="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
+    </div>
+    <div id="prev"></div>
+  </section>
+
+  <section id="t-grn" hidden>
+    <div class="search"><input id="q" type="search" placeholder="Search VIN, engine, TKM invoice no. or model" autocomplete="off"><button class="btn sm" id="qBtn">Search</button></div>
+    <div class="row" style="margin-bottom:10px"><button class="btn sm" id="pendBtn">Waiting for GRN</button><small class="mut" id="grnInfo"></small></div>
+    <div id="vlist"></div>
+  </section>
+
+  <section id="t-hist" hidden><div id="hlist"></div></section>
+</main>
+<div id="busy" hidden>Please wait…</div>
+<div id="toast" hidden></div>
+
+<script>
+/* ───────── CONNECT: paste the Purchase Upload Apps Script web-app URL (ends with /exec) ───────── */
+const API = 'PASTE_PURCHASE_SCRIPT_URL_HERE';
+/* ─────────────────────────────────────────────────────────────────────────────────────────────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr = n => n == null || n === '' ? '' : '₹' + Number(n).toLocaleString('en-IN', {maximumFractionDigits: 2});
+const fd = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? m[3] + '-' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2] - 1] + '-' + m[1] : (s || ''); };
+let U = null, FILE = null, PREV = null, LIST = [];
+
+/* ═══════════ STAFF PORTAL — single login (replaces this app's own PIN) ═══════════ */
+var PT_PORTAL_URL = 'https://planettoyota.github.io/main/';
+var PT_APP_ID = 'PURCHASE';          // must match the App ID in the portal's Apps list
+function ptPortalVerify() {          // asks the portal: is this phone logged in, and allowed in this app?
+  return new Promise(function (resolve, reject) {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem('pt_portal') || 'null'); } catch (e) {}
+    if (!s || !s.token || !s.api) { reject({ code: 'LOGIN', message: 'Please log in to the Staff Portal.' }); return; }
+    fetch(s.api + '?payload=' + encodeURIComponent(JSON.stringify({ action: 'verify', token: s.token, app: PT_APP_ID })) + '&n=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.ok) resolve({ name: j.user.name, empId: j.user.empId, role: j.role });
+        else reject({ code: j && j.code === 'AUTH' ? 'LOGIN' : 'DENIED', message: (j && j.error) || 'You do not have access to this app.' });
+      })
+      .catch(function () { reject({ code: 'OFFLINE', message: 'Could not check your login. Check your internet and try again.' }); });
+  });
+}
+function ptSameName(a, b) {
+  function n(s) { return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+  return n(a) === n(b);
+}
+function ptGate(title, msg, retry) { // full-screen notice while checking, or when access is refused
+  var o = document.getElementById('ptGate');
+  if (!o) {
+    o = document.createElement('div'); o.id = 'ptGate';
+    o.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif';
+    document.body.appendChild(o);
+  }
+  o.innerHTML = '';
+  function el(tag, css, text) { var e = document.createElement(tag); e.style.cssText = css; e.textContent = text; o.appendChild(e); return e; }
+  el('div', 'font-size:19px;font-weight:800;margin-bottom:8px', title);
+  el('div', 'font-size:14px;color:#555;max-width:320px;line-height:1.5;margin-bottom:22px', msg);
+  if (retry !== undefined) {
+    var btn = 'border:none;border-radius:12px;padding:13px 22px;font-size:15px;font-weight:700;cursor:pointer;width:100%;max-width:280px;margin-bottom:10px;';
+    if (retry) el('button', btn + 'background:#111;color:#fff', 'Try again').onclick = function () { location.reload(); };
+    el('button', btn + (retry ? 'background:#eee;color:#111' : 'background:#111;color:#fff'), 'Go to Staff Portal').onclick = function () { location.href = PT_PORTAL_URL; };
+  }
+}
+function ptGateHide() { var o = document.getElementById('ptGate'); if (o) o.remove(); }
+function ptEnter(onOk) {             // onOk({name, empId, role}) runs only for a valid portal login
+  ptGate('Checking your login…', 'Please wait.');
+  ptPortalVerify().then(onOk, function (e) {
+    if (e.code === 'LOGIN') { location.replace(PT_PORTAL_URL); return; }
+    ptGate(e.code === 'OFFLINE' ? 'No connection' : 'No access', e.message, e.code === 'OFFLINE');
+  });
+}
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+function ptTok() { try { return (JSON.parse(localStorage.getItem('pt_portal') || 'null') || {}).token || ''; } catch (e) { return ''; } }
+
+/* ───────── server ───────── */
+function jsonp(action, data){
+  return new Promise((res, rej) => {
+    const cb = 'cb' + Date.now() + Math.floor(Math.random() * 1e6), s = document.createElement('script');
+    const done = () => { clearTimeout(t); delete window[cb]; s.remove(); };
+    const t = setTimeout(() => { done(); rej(new Error('The server did not respond. Try again.')); }, 60000);
+    window[cb] = r => { done(); if (r && r.ok) res(r); else { if (r && r.auth === false) ptGate('No access', r.error, false); rej(new Error((r && r.error) || 'Error')); } };
+    s.onerror = () => { done(); rej(new Error('No connection to the server. Check the internet and try again.')); };
+    s.src = API + '?callback=' + cb + '&n=' + Date.now() + '&payload=' + encodeURIComponent(JSON.stringify(Object.assign({action, ptk: ptTok()}, data || {})));
+    document.body.appendChild(s);
+  });
+}
+async function post(action, data){   // for the Excel file, which is too large for a link
+  let r;
+  try { r = await (await fetch(API, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(Object.assign({action, ptk: ptTok()}, data))})).json(); }
+  catch (e) { throw new Error('No connection to the server. Check the internet and try again.'); }
+  if (!r.ok) { if (r.auth === false) ptGate('No access', r.error, false); throw new Error(r.error || 'Error'); }
+  return r;
+}
+let toastT;
+function toast(m, bad){ const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad' : ''; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, bad ? 6000 : 3000); }
+async function run(fn){ $('#busy').hidden = false; try { return await fn(); } catch (e) { toast(e.message, true); } finally { $('#busy').hidden = true; } }
+
+/* ───────── upload ───────── */
+const readB64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = () => rej(new Error('Could not read the file')); r.readAsDataURL(f); });
+$('#file').onchange = e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (/\.xls$/i.test(f.name)) return toast('This is an old .xls file. Open it in Excel, save it as "Excel Workbook (.xlsx)" and upload that.', true);
+  run(async () => { FILE = {name: f.name, b64: await readB64(f)}; PREV = await post('preview', FILE); showPrev(); });
+};
+function vehRows(list, extra){
+  return `<div class="tw"><table><tr><th>VIN</th><th>Model / suffix</th><th>Colour</th><th>TKM invoice</th><th style="text-align:right">Amount</th>${extra ? '<th>' + extra[0] + '</th>' : ''}</tr>` +
+    list.map(v => `<tr><td><b>${esc(v.vinFull || v.vin)}</b><br><small class="mut">${esc(v.engine)}</small>${v.problems && v.problems.length ? `<div class="prob">${esc(v.problems.join('; '))}</div>` : ''}</td><td>${esc(v.model)}<br><small class="mut">${esc(v.suffix)}</small></td><td>${esc(v.colour)}</td>
+      <td>${esc(v.invNo)}<br><small class="mut">${esc(fd(v.invDate))}</small></td><td style="text-align:right">${esc(inr(v.invValue))}<br><small class="mut">tax ${esc(inr(v.tax))}</small></td>${extra ? '<td>' + extra[1](v) + '</td>' : ''}</tr>`).join('') + `</table></div>`;
+}
+function showPrev(){
+  const p = PREV, n = p.add.length;
+  $('#prev').innerHTML = `<div class="card"><h3>${esc(FILE.name)}</h3><small class="mut">${p.total} vehicle${p.total === 1 ? '' : 's'} in the file</small>
+    <div class="stats"><div class="stat ok"><b>${n}</b>new, will be added</div><div class="stat"><b>${p.dup.length}</b>already in Purchase Data</div><div class="stat warn"><b>${p.bad.length}</b>with a problem</div></div>
+    ${n ? `<p style="margin:6px 0 10px">They go in rows <b>${p.nextRow}</b> to <b>${p.nextRow + n - 1}</b>, directly below the last vehicle.</p>
+      <div class="row"><button class="btn pri" id="addBtn">Add ${n} vehicle${n === 1 ? '' : 's'} to Purchase Data</button><button class="btn" id="cancelBtn">Cancel</button></div>`
+      : `<p class="mut">Nothing new to add.</p><button class="btn" id="cancelBtn">Close</button>`}</div>
+    ${n ? `<div class="card"><h3>New vehicles</h3>${vehRows(p.add)}</div>` : ''}
+    ${p.bad.length ? `<div class="card"><h3>Not added: problem in the file</h3><small class="mut">Correct these in CTDMS or the file and upload again.</small>${vehRows(p.bad)}</div>` : ''}
+    ${p.dup.length ? `<div class="card"><h3>Already in Purchase Data</h3>${vehRows(p.dup, ['Row', v => esc(v.row)])}</div>` : ''}`;
+  const a = $('#addBtn'); if (a) a.onclick = commit;
+  $('#cancelBtn').onclick = () => { PREV = FILE = null; $('#prev').innerHTML = ''; };
+  $('#prev').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+function commit(){
+  if (!confirm('Add ' + PREV.add.length + ' vehicles to Purchase Data? Rows that are added cannot be removed from this app.')) return;
+  run(async () => {
+    const r = await post('commit', FILE);
+    $('#prev').innerHTML = `<div class="card"><h3>✓ ${r.added} vehicle${r.added === 1 ? '' : 's'} added</h3>
+      <p>${r.rows ? `Rows ${r.rows[0]} to ${r.rows[1]} of Purchase Data. ` : ''}${r.dup ? r.dup + ' were already there. ' : ''}${r.bad.length ? r.bad.length + ' not added because of a problem in the file.' : ''}</p>
+      <p class="mut">Fill the GRN number and date when each vehicle is received, in "GRN &amp; transfer".</p></div>`;
+    PREV = FILE = null; toast(r.added + ' added');
+  });
+}
+
+/* ───────── GRN and stock transfer ───────── */
+const F = [['grnNo','GRN No.','text'],['grnDate','GRN Date','date'],['stStatus','Stock transfer','yn'],['stInvNo','Stock transfer invoice no.','text'],['stInvDate','Stock transfer invoice date','date'],['stDealer','Stock transfer dealer','text']];
+function vehCard(v, i){
+  const lock = k => U.role !== 'Admin' && v[k] && !(k === 'stStatus' && v[k] === 'No');   // a User fills blanks only
+  const st = v.stStatus === 'Yes';
+  const inp = ([k, lab, t]) => {
+    if (t === 'yn') return `<label>${lab}<select data-k="${k}" ${lock(k) ? 'disabled' : ''}>${['No','Yes'].map(o => `<option ${o === (v[k] || 'No') ? 'selected' : ''}>${o}</option>`).join('')}</select></label>`;
+    return `<label ${k.indexOf('stInv') === 0 || k === 'stDealer' ? `data-st ${st ? '' : 'hidden'}` : ''}>${lab}<input data-k="${k}" type="${t}" value="${esc(v[k])}" ${lock(k) ? 'disabled' : ''}></label>`;
+  };
+  const anyOpen = F.some(f => !lock(f[0]));
+  return `<div class="card veh" data-i="${i}"><div class="hd"><div><b>${esc(v.vin)}</b><br><small class="mut">${esc(v.model)} · ${esc(v.suffix)} · ${esc(v.colour)}</small><br>
+      <small class="mut">Engine ${esc(v.engine)} · TKM inv. ${esc(v.invNo)} dated ${esc(fd(v.invDate))} · row ${v.row}</small></div>
+      <span class="chip ${v.grnNo ? 'ok' : 'warn'}">${v.grnNo ? 'GRN done' : 'GRN pending'}</span></div>
+    <div class="g2">${F.map(inp).join('')}</div>
+    ${anyOpen ? `<button class="btn pri sm" data-save="${i}">Save</button>` : ''}
+    ${U.role !== 'Admin' ? '<small class="mut" style="display:block;margin-top:8px">Filled details can be corrected only by an Admin.</small>' : ''}</div>`;
+}
+function showList(info){
+  $('#grnInfo').textContent = info || '';
+  $('#vlist').innerHTML = LIST.length ? LIST.map(vehCard).join('') : '<p class="mut" style="text-align:center;padding:24px">No vehicles found.</p>';
+}
+const loadPending = () => run(async () => { LIST = (await jsonp('find', {grnPending: 1})).list; showList(LIST.length ? LIST.length + ' vehicle' + (LIST.length === 1 ? '' : 's') + ' waiting for the GRN (latest first)' : 'Every vehicle has its GRN'); });
+const search = () => { const q = $('#q').value.trim(); if (!q) return loadPending(); run(async () => { LIST = (await jsonp('find', {q})).list; showList(LIST.length + ' found' + (LIST.length >= 40 ? ' (first 40)' : '')); }); };
+$('#qBtn').onclick = search; $('#q').onkeydown = e => { if (e.key === 'Enter') search(); }; $('#pendBtn').onclick = () => { $('#q').value = ''; loadPending(); };
+$('#vlist').addEventListener('change', e => { if (e.target.dataset.k === 'stStatus') e.target.closest('.veh').querySelectorAll('[data-st]').forEach(l => l.hidden = e.target.value !== 'Yes'); });
+$('#vlist').addEventListener('click', e => {
+  const b = e.target.closest('[data-save]'); if (!b) return;
+  const i = +b.dataset.save, v = LIST[i], box = b.closest('.veh'), f = {};
+  box.querySelectorAll('[data-k]').forEach(el => { if (!el.disabled && el.value.trim() !== (v[el.dataset.k] || '') && !(el.dataset.k === 'stStatus' && el.value === 'No' && !v.stStatus)) f[el.dataset.k] = el.value.trim(); });
+  if (!Object.keys(f).length) return toast('Nothing changed');
+  if (f.stStatus === 'Yes' && !(f.stInvNo || v.stInvNo)) return toast('Enter the stock transfer invoice no.', true);
+  run(async () => { const r = await jsonp('update', {vin: v.vin, fields: f}); LIST[i] = r.vehicle; box.outerHTML = vehCard(r.vehicle, i); toast('Saved'); });
+});
+
+/* ───────── history ───────── */
+const loadHist = () => run(async () => {
+  const l = (await jsonp('history')).list;
+  $('#hlist').innerHTML = l.length ? l.map(h => `<div class="card"><div class="row" style="justify-content:space-between"><b>${esc(h.File)}</b><span class="chip ${+h.Added ? 'ok' : ''}">${esc(h.Added)} added</span></div>
+    <small class="mut">${esc(h.At)} · ${esc(h.User)} · ${esc(h['Rows in file'])} in file · ${esc(h['Already there'])} already there${h.Rows ? ' · rows ' + esc(h.Rows) : ''}</small>
+    ${h['Not added (problem)'] ? `<div class="prob" style="margin-top:6px">${esc(h['Not added (problem)'])}</div>` : ''}
+    ${h['Saved copy'] && /^https:/.test(h['Saved copy']) ? `<div style="margin-top:6px"><a href="${esc(h['Saved copy'])}" target="_blank" rel="noopener">Uploaded file</a></div>` : ''}</div>`).join('')
+    : '<p class="mut" style="text-align:center;padding:24px">No uploads yet.</p>';
+});
+
+/* ───────── start ───────── */
+document.querySelector('.tabs').onclick = e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  ['up', 'grn', 'hist'].forEach(t => $('#t-' + t).hidden = t !== b.dataset.tab);
+  if (b.dataset.tab === 'grn' && !LIST.length) loadPending();
+  if (b.dataset.tab === 'hist') loadHist();
+};
+$('#portalBtn').onclick = () => { location.href = PT_PORTAL_URL; };
+(async function start(){
+  if (!/^https:\/\/script\.google\.com\//.test(API)) return ptGate('Not connected', 'Paste the Purchase Upload Apps Script URL into index.html.', false);
+  if (!ptTok()) return location.replace(PT_PORTAL_URL);
+  ptGate('Checking your login…', 'Please wait.');
+  try { U = (await jsonp('login')).user; } catch (e) { return ptGate('Could not open Purchase Upload', e.message, true); }
+  ptGateHide();
+  $('#who').textContent = U.name + ' · ' + U.role;
+  $('#app').hidden = false;
+})();
+</script>
+</body>
+</html>
